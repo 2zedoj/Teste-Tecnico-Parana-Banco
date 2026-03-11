@@ -9,6 +9,7 @@ namespace PropostaService.Domain.Entities.Propostas.InputCommands
     public abstract class BasePropostaInputCommand
     {
         public Guid ClientId { get; set; }
+        public string ClientName { get; set; } = null!;
         public int Score { get; set; }
     }
 

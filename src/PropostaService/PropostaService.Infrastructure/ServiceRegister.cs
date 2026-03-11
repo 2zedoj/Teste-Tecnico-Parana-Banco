@@ -41,6 +41,13 @@ namespace PropostaService.Infrastructure
 
                 x.UsingRabbitMq((ctx, cfg) =>
                 {
+
+                    cfg.UseMessageRetry(r =>
+                        r.Exponential(5,
+                            TimeSpan.FromSeconds(1),
+                            TimeSpan.FromSeconds(30),
+                            TimeSpan.FromSeconds(5)));
+
                     cfg.Host(config["RabbitMQ:Host"], "/", h =>
                     {
                         h.Username(config["RabbitMQ:Username"]);
