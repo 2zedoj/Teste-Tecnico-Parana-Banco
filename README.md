@@ -23,7 +23,7 @@ Sistema de crédito baseado em microserviços com comunicação assíncrona via 
 
 ## 📊 Fluxograma da Solução
 
-![Fluxograma](./docs/FluxogramaTestesTecnico_drawio.png)
+![Fluxograma](./docs/FluxogramaTestesTecnico.drawio.png)
 
 O fluxo completo funciona da seguinte forma:
 
