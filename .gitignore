@@ -1,0 +1,27 @@
+# Build
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Docker
+.dockerignore
+
+# Arquivos desnecessários na raiz
+wwwroot/
+Pages/
+Program.cs
+appsettings.json
+appsettings.Development.json
+solution.csproj
+solution.csproj.user
+ClientCreatedIntegrationEvent.cs
+Dockerfile
+docker-compose.override.yml
+docker-compose.yml

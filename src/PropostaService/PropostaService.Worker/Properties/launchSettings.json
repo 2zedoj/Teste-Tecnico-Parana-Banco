@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PropostaService.Worker": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
