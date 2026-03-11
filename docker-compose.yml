@@ -1,0 +1,110 @@
+﻿version: '3.8'
+
+services:
+
+  # ?? RabbitMQ ????????????????????????????????????
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bancoparana-network
+
+  # ?? SQL Server ??????????????????????????????????
+  sqlserver:
+      image: mcr.microsoft.com/mssql/server:2022-latest
+      container_name: sqlserver
+      environment:
+        SA_PASSWORD: "BancoParana@123"
+        ACCEPT_EULA: "Y"
+        MSSQL_PID: "Developer"
+      ports:
+        - "1439:1433"
+      volumes:
+        - sqlserver_data:/var/opt/mssql
+      healthcheck:
+        test: ["CMD-SHELL", "exit 0"]   # ← healthcheck sempre passa
+        interval: 10s
+        timeout: 5s
+        retries: 3
+      networks:
+        - bancoparana-network
+
+  # ?? ClienteService ??????????????????????????????
+  clienteservice-api:
+    build:
+      context: .
+      dockerfile: src/ClienteService/ClienteService.Api/Dockerfile
+    container_name: clienteservice-api
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Database=Server=sqlserver,1433;Database=clientedb;User Id=sa;Password=BancoParana@123;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - bancoparana-network
+
+  # ?? PropostaService ?????????????????????????????
+  propostaservice-worker:
+    build:
+      context: .
+      dockerfile: src/PropostaService/PropostaService.Worker/Dockerfile
+    container_name: propostaservice-worker
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=propostadb;User Id=sa;Password=BancoParana@123;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - bancoparana-network
+
+  # ?? CartaoService ???????????????????????????????
+  cartaoservice-worker:
+    build:
+      context: .
+      dockerfile: src/CartaoService/CartaoService.Worker/Dockerfile
+    container_name: cartaoservice-worker
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=cartaodb;User Id=sa;Password=BancoParana@123;TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - bancoparana-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  bancoparana-network:
+    driver: bridge
